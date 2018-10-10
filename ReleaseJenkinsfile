@@ -1,0 +1,37 @@
+pipeline {
+    agent any
+    tools {
+        maven 'Maven3'
+        jdk 'jdk8'
+    }
+
+    stages {
+        stage ('Initialize') {
+            steps {
+                sh '''
+                    echo "PATH = ${PATH}"
+                    echo "M2_HOME = ${M2_HOME}"
+                '''
+            }
+        }
+
+        stage ('Build') {
+            steps
+            {
+                withMaven(
+                    maven: 'Maven3',
+                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                mavenLocalRepo: '${M2_HOME}/.repository')
+                {
+                    sh "mvn -B release:prepare release:perform"
+                }
+            }
+            post {
+                success {
+                    sh 'mkdir -p jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./jenkins-release';
+                    archiveArtifacts artifacts: 'jenkins-release/*.*', fingerprint: true
+                }
+            }
+        }
+    }
+}
