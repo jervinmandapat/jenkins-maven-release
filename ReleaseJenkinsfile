@@ -53,7 +53,7 @@ pipeline {
             //}
         }
 
-        stage (''Build, Release but not Increase Version''){
+        stage ('Build, Release but not Increase Version'){
             when
             {
                 expression { params.INCREASE_VERSION == 'NOT-increase-version'}
