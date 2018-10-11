@@ -7,10 +7,7 @@ pipeline {
 
     parameters
     {
-        choice(
-        choices: 'increase-version\ndont-increase-version',
-        description: 'Increase version?',
-        name: 'INCREASE_VERSION')
+        choice(choices: ['increase-version', 'NOT-increase-version'], description: 'Increase version of the build or release?', name: 'INCREASE_VERSION')
     }
 
     stages {
@@ -31,22 +28,39 @@ pipeline {
             }
         }
 
-        stage ('Build') {
+        stage ('Build, Release and Increase Version') {
+            when
+            {
+                expression { params.INCREASE_VERSION == 'increase-version'}
+            }
             steps
             {
-                withMaven(
-                    maven: 'Maven3',
-                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                mavenLocalRepo: '${M2_HOME}/.repository')
-                {
-                    sh "mvn -B release:prepare release:perform"
-                }
+                echo 'Increasing version..'
+
+                //withMaven(
+                //    maven: 'Maven3',
+                //    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                //mavenLocalRepo: '${M2_HOME}/.repository')
+                //{
+                //    sh "mvn -B release:prepare release:perform"
+                //}
             }
-            post {
-                success {
-                    sh 'mkdir -p jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./jenkins-release';
-                    archiveArtifacts artifacts: 'jenkins-release/*.*', fingerprint: true
-                }
+            //post {
+            //    success {
+            //        sh 'mkdir -p jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./jenkins-release';
+            //        archiveArtifacts artifacts: 'jenkins-release/*.*', fingerprint: true
+            //    }
+            //}
+        }
+
+        stage (''Build, Release but not Increase Version''){
+            when
+            {
+                expression { params.INCREASE_VERSION == 'NOT-increase-version'}
+            }
+            steps
+            {
+                echo 'Not increasing version..'
             }
         }
     }
