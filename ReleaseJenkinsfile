@@ -47,8 +47,8 @@ pipeline {
             }
             post {
                 success {
-                    sh 'mkdir -p jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./jenkins-release';
-                    archiveArtifacts artifacts: 'jenkins-release/*.*', fingerprint: true
+                    sh 'mkdir -p sample-jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./sample-jenkins-release';
+                    archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
                 }
             }
         }
@@ -61,6 +61,20 @@ pipeline {
             steps
             {
                 echo 'Not increasing version..'
+
+                withMaven(
+                    maven: 'Maven3',
+                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                mavenLocalRepo: '${M2_HOME}/.repository')
+                {
+                    sh "mvn clean install"
+                }
+            }
+            post {
+                success {
+                    sh 'mkdir -p sample-jenkins-release && cp ./jenkins/target/*.jar ./sample-jenkins-release';
+                    archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
+                }
             }
         }
     }
