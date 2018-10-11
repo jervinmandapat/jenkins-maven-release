@@ -1,30 +1,41 @@
-pipeline {
-    agent{
+pipeline 
+{
+    agent
+    {
         label 'docker-slave-ssh'
     }
-    tools {
+
+    tools 
+    {
         maven 'Maven3'
         jdk 'jdk8'
     }
 
-    parameters{
+    parameters
+    {
+        // Just simple choice to verify and to avoid accidentally 
+        // building this job in jenkins (if not actually needed)
         choice(
             choices: ['YES', 'NO'],
-            description: 'VERIFY IF YOU WANT TO RELEASE?',
-            name: 'isRelease'
+            description: 'PLEASE VERIFY RELEASE!!! Are you sure you need a release?',
+            name: 'MAKE_A_RELEASE'
         )
     }
 
-    environment{
+    environment
+    {
+        // USER_CREDENTIALS create below variables, appending _USR & _PSW
+        // $USER_CREDENTIALS_USR = username from credentials
+        // $USER_CREDENTIALS_PSW = password from credentials
         USER_CREDENTIALS = credentials('JervinGit')
     }
-    // env USER_CREDENTIALS create below variable
-    // $USER_CREDENTIALS_USR = username
-    // $USER_CREDENTIALS_PSW = password
 
-    stages {
-        stage ('Initialize') {
-            steps {
+    stages 
+    {
+        stage ('Initialize') 
+        {
+            steps 
+            {
                 sh '''
                     echo "PATH = ${PATH}"
                     echo "M2_HOME = ${M2_HOME}"
@@ -32,7 +43,8 @@ pipeline {
             }
         }
 
-        stage ('Setting Git Config'){
+        stage ('Git Config')
+        {
             steps
             {
                 sh 'git config user.email "jervinmandapat@gmail.com"'
@@ -40,24 +52,29 @@ pipeline {
             }
         }
 
-        stage ('Perform Maven Release') {
+        stage ('Perform Maven Release') 
+        {
             when
             {
-                expression { params.isRelease == 'YES' }
+                expression { params.MAKE_A_RELEASE == 'YES' }
             }
             steps
             {
                 echo 'Preparing and performing release..'
                 withMaven(
                     maven: 'Maven3',
-                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                mavenLocalRepo: '${M2_HOME}/.repository')
+                    options: [artifactsPublisher(disabled: true), junitPublisher(disabled: true)],
+                    mavenLocalRepo: '${M2_HOME}/.repository'
+                )
                 {
-                    sh 'mvn --batch-mode release:clean release:prepare release:perform -Dusername=${USER_CREDENTIALS_USR} -Dpassword=${USER_CREDENTIALS_PSW}'
+                    sh 'mvn --batch-mode release:clean release:prepare release:perform 
+                        -Dusername=${USER_CREDENTIALS_USR} -Dpassword=${USER_CREDENTIALS_PSW}'
                 }
             }
-            post {
-                success {
+            post 
+            {
+                success 
+                {
                     echo 'Archiving artifacts..'
                     sh 'mkdir -p mavenRelease && cp ./target/checkout/jenkins/target/*.jar ./mavenRelease';
                     archiveArtifacts artifacts: 'mavenRelease/*.*', fingerprint: true
