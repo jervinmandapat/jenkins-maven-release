@@ -7,6 +7,14 @@ pipeline {
         jdk 'jdk8'
     }
 
+    parameters{
+        choice(
+            choices: ['YES', 'NO'],
+            description: 'VERIFY IF YOU WANT TO RELEASE?',
+            name: 'isRelease'
+        )
+    }
+
     environment{
         USER_CREDENTIALS = credentials('JervinGit')
     }
@@ -33,6 +41,10 @@ pipeline {
         }
 
         stage ('Perform Maven Release') {
+            when
+            {
+                expression { params.isRelease == 'YES' }
+            }
             steps
             {
                 echo 'Preparing and performing release..'
@@ -50,6 +62,15 @@ pipeline {
                     sh 'mkdir -p mavenRelease && cp ./target/checkout/jenkins/target/*.jar ./mavenRelease';
                     archiveArtifacts artifacts: 'mavenRelease/*.*', fingerprint: true
                 }
+            }
+
+            when
+            {
+                expression { params.isRelease == 'NO' }
+            }
+            steps
+            {
+                echo 'Okay, not releasing..'
             }
         }
     }
