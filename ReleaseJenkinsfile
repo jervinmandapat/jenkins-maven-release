@@ -37,20 +37,20 @@ pipeline {
             {
                 echo 'Increasing version..'
 
-                //withMaven(
-                //    maven: 'Maven3',
-                //    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                //mavenLocalRepo: '${M2_HOME}/.repository')
-                //{
-                //    sh "mvn -B release:prepare release:perform"
-                //}
+                withMaven(
+                    maven: 'Maven3',
+                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                mavenLocalRepo: '${M2_HOME}/.repository')
+                {
+                    sh "mvn -B release:prepare release:perform"
+                }
             }
-            //post {
-            //    success {
-            //        sh 'mkdir -p jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./jenkins-release';
-            //        archiveArtifacts artifacts: 'jenkins-release/*.*', fingerprint: true
-            //    }
-            //}
+            post {
+                success {
+                    sh 'mkdir -p jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./jenkins-release';
+                    archiveArtifacts artifacts: 'jenkins-release/*.*', fingerprint: true
+                }
+            }
         }
 
         stage ('Build, Release but not Increase Version'){
