@@ -7,10 +7,16 @@ pipeline {
         jdk 'jdk8'
     }
 
+    environment{
+        USER_CREDENTIALS = credentials('JervinGit')
+    }
+
     stages {
         stage ('Initialize') {
             steps {
                 sh '''
+                    echo "USER_CREDENTIALS_USR = $USER_CREDENTIALS_USR"
+                    echo "USER_CREDENTIALS_USR = $USER_CREDENTIALS_PSW"
                     echo "PATH = ${PATH}"
                     echo "M2_HOME = ${M2_HOME}"
                 '''
@@ -30,17 +36,17 @@ pipeline {
             {
                 echo 'Preparing releasing..'
 
-                git branch: 'master',
-                    credentialsId: 'JervinGit',
-                    url: 'https://github.com/jervinmandapat/jenkins-maven-release.git'
+                // git branch: 'master',
+                //     credentialsId: 'JervinGit',
+                //     url: 'https://github.com/jervinmandapat/jenkins-maven-release.git'
 
-                withMaven(
-                    maven: 'Maven3',
-                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                mavenLocalRepo: '${M2_HOME}/.repository')
-                {
-                    sh "mvn --batch-mode release:clean release:prepare release:perform"
-                }
+                // withMaven(
+                //     maven: 'Maven3',
+                //     options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                // mavenLocalRepo: '${M2_HOME}/.repository')
+                // {
+                //     sh "mvn --batch-mode release:clean release:prepare release:perform"
+                // }
             }
             // post {
             //     success {
