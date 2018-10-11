@@ -5,6 +5,14 @@ pipeline {
         jdk 'jdk8'
     }
 
+    parameters
+    {
+        choice(
+        choices: 'increase-version\ndont-increase-version',
+        description: 'Increase version?',
+        name: 'INCREASE_VERSION')
+    }
+
     stages {
         stage ('Initialize') {
             steps {
