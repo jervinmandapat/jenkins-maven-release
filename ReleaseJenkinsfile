@@ -35,8 +35,7 @@ pipeline {
         stage ('Perform Maven Release') {
             steps
             {
-                echo 'Preparing releasing..'
-
+                echo 'Preparing and performing release..'
                 withMaven(
                     maven: 'Maven3',
                     options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
@@ -46,9 +45,8 @@ pipeline {
                 }
             }
             post {
-                echo 'Archiving artifacts..'
-
                 success {
+                    echo 'Archiving artifacts..'
                     sh 'mkdir -p mavenRelease && cp ./target/checkout/jenkins/target/*.jar ./mavenRelease';
                     archiveArtifacts artifacts: 'mavenRelease/*.*', fingerprint: true
                 }
