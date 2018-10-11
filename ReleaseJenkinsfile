@@ -10,6 +10,9 @@ pipeline {
     environment{
         USER_CREDENTIALS = credentials('JervinGit')
     }
+    // env USER_CREDENTIALS create below variable
+    // $USER_CREDENTIALS_USR = username
+    // $USER_CREDENTIALS_PSW = password
 
     stages {
         stage ('Initialize') {
@@ -20,9 +23,6 @@ pipeline {
                 '''
             }
         }
-
-        // $USER_CREDENTIALS_USR
-        // $USER_CREDENTIALS_PSW
 
         stage ('Setting Git Config'){
             steps
@@ -45,27 +45,14 @@ pipeline {
                     sh 'mvn --batch-mode release:clean release:prepare release:perform -Dusername=${USER_CREDENTIALS_USR} -Dpassword=${USER_CREDENTIALS_PSW}'
                 }
             }
-            // post {
-            //     success {
-            //         echo 'Performing Release..'
-            //         withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-            //         mavenLocalRepo: '${M2_HOME}/.repository')
-            //         {
-            //             sh "mvn -B release:perform"
-            //         }
+            post {
+                echo 'Archiving artifacts..'
 
-            //         sh 'mkdir -p sample-jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./sample-jenkins-release';
-            //         archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
-            //     }
-            //     failure {
-            //         echo 'Release rollback..'
-            //         withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-            //         mavenLocalRepo: '${M2_HOME}/.repository')
-            //         {
-            //             sh "mvn -B release:rollback"
-            //         }
-            //     }
-            // }
+                success {
+                    sh 'mkdir -p mavenRelease && cp ./target/checkout/jenkins/target/*.jar ./mavenRelease';
+                    archiveArtifacts artifacts: 'mavenRelease/*.*', fingerprint: true
+                }
+            }
         }
     }
 }
