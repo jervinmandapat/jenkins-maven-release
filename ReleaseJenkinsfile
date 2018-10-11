@@ -21,7 +21,7 @@ pipeline {
             steps
             {
                 sh 'git config user.email "jervinmandapat@gmail.com"'
-                sh 'git config user.name "Jervin Mandapat"'
+                sh 'git config user.name "jervinmandapat"'
             }
         }
 
@@ -30,16 +30,15 @@ pipeline {
             {
                 echo 'Preparing releasing..'
 
-                git branch: 'master',
-                    credentialsId: 'JervinGit',
-                    url: 'https://jervinmandapat@github.com/jervinmandapat/jenkins-maven-release.git'
+                // git branch: 'master',
+                //     credentialsId: 'JervinGit',
+                //     url: 'https://github.com/jervinmandapat/jenkins-maven-release.git'
 
                 withMaven(
                     maven: 'Maven3',
                     options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
                 mavenLocalRepo: '${M2_HOME}/.repository')
                 {
-                    // sh "mvn clean"
                     sh "mvn --batch-mode release:clean release:prepare release:perform"
                 }
             }
