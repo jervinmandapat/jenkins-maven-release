@@ -15,13 +15,14 @@ pipeline {
         stage ('Initialize') {
             steps {
                 sh '''
-                    echo "USER_CREDENTIALS_USR = $USER_CREDENTIALS_USR"
-                    echo "USER_CREDENTIALS_USR = $USER_CREDENTIALS_PSW"
                     echo "PATH = ${PATH}"
                     echo "M2_HOME = ${M2_HOME}"
                 '''
             }
         }
+
+        // $USER_CREDENTIALS_USR
+        // $USER_CREDENTIALS_PSW
 
         stage ('Setting Git Config'){
             steps
@@ -36,9 +37,9 @@ pipeline {
             {
                 echo 'Preparing releasing..'
 
-                // git branch: 'master',
-                //     credentialsId: 'JervinGit',
-                //     url: 'https://github.com/jervinmandapat/jenkins-maven-release.git'
+                git branch: 'master',
+                    credentialsId: 'JervinGit',
+                    url: 'https://$USER_CREDENTIALS_USR:$USER_CREDENTIALS_PSW@github.com/jervinmandapat/jenkins-maven-release.git'
 
                 // withMaven(
                 //     maven: 'Maven3',
