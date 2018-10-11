@@ -7,13 +7,6 @@ pipeline {
         jdk 'jdk8'
     }
 
-    parameters
-    {
-        choice(choices: ['RELEASE-PREPARE', 'RELEASE-PERFORM', 'RELEASE-ROLLBACK'], 
-        description: 'Please select release stages (For successful release: RELEASE-PREPARE -> RELEASE:PERFORM), if RELEASE-PREPARE fails -> RELEASE-ROLLBACK', 
-        name: 'release')
-    }
-
     stages {
         stage ('Initialize') {
             steps {
@@ -32,77 +25,38 @@ pipeline {
             }
         }
 
-        stage ('Prepare-Release') {
-            when
-            {
-                expression { params.release == 'RELEASE-PREPARE'}
-            }
+        stage ('Perform Maven Release') {
             steps
             {
-                echo 'Preparing release..'
-
+                echo 'Preparing releasing..'
                 withMaven(
                     maven: 'Maven3',
                     options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
                 mavenLocalRepo: '${M2_HOME}/.repository')
                 {
+                    sh "mvn clean"
                     sh "mvn -B release:prepare"
                 }
             }
             post {
                 success {
+                    echo 'Performing Release..'
+                    withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                    mavenLocalRepo: '${M2_HOME}/.repository')
+                    {
+                        sh "mvn -B release:perform"
+                    }
+
                     sh 'mkdir -p sample-jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./sample-jenkins-release';
                     archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
                 }
-            }
-        }
-
-        stage ('Perform-Release'){
-            when
-            {
-                expression { params.release == 'RELEASE-PERFORM'}
-            }
-            steps
-            {
-                echo 'Performing release'
-
-                withMaven(
-                    maven: 'Maven3',
-                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                mavenLocalRepo: '${M2_HOME}/.repository')
-                {
-                    sh "mvn -B release:perform"
-                }
-            }
-            post {
-                success {
-                    sh 'mkdir -p sample-jenkins-release && cp ./jenkins/target/*.jar ./sample-jenkins-release';
-                    archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
-                }
-            }
-        }
-
-        stage ('Release-Rollback'){
-            when
-            {
-                expression { params.release == 'RELEASE-ROLLBACK'}
-            }
-            steps
-            {
-                echo 'Performing release'
-
-                withMaven(
-                    maven: 'Maven3',
-                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                mavenLocalRepo: '${M2_HOME}/.repository')
-                {
-                    sh "mvn -B release:rollback"
-                }
-            }
-            post {
-                success {
-                    sh 'mkdir -p sample-jenkins-release && cp ./jenkins/target/*.jar ./sample-jenkins-release';
-                    archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
+                failure {
+                    echo 'Release rollback..'
+                    withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                    mavenLocalRepo: '${M2_HOME}/.repository')
+                    {
+                        sh "mvn -B release:rollback"
+                    }
                 }
             }
         }
