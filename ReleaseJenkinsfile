@@ -30,9 +30,9 @@ pipeline {
             {
                 echo 'Preparing releasing..'
 
-                // git branch: 'master',
-                //     credentialsId: 'JervinGit',
-                //     url: 'https://github.com/jervinmandapat/jenkins-maven-release.git'
+                git branch: 'master',
+                    credentialsId: 'JervinGit',
+                    url: 'https://github.com/jervinmandapat/jenkins-maven-release.git'
 
                 withMaven(
                     maven: 'Maven3',
