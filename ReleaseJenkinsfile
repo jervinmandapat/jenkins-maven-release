@@ -37,17 +37,13 @@ pipeline {
             {
                 echo 'Preparing releasing..'
 
-                git branch: 'master',
-                    credentialsId: 'JervinGit',
-                    url: 'https://$USER_CREDENTIALS_USR:$USER_CREDENTIALS_PSW@github.com/jervinmandapat/jenkins-maven-release.git'
-
-                // withMaven(
-                //     maven: 'Maven3',
-                //     options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                // mavenLocalRepo: '${M2_HOME}/.repository')
-                // {
-                //     sh "mvn --batch-mode release:clean release:prepare release:perform"
-                // }
+                withMaven(
+                    maven: 'Maven3',
+                    options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+                mavenLocalRepo: '${M2_HOME}/.repository')
+                {
+                    sh 'mvn --batch-mode release:clean release:prepare release:perform -Dusername=${USER_CREDENTIALS_USR} -Dpassword=${USER_CREDENTIALS_PSW}'
+                }
             }
             // post {
             //     success {
