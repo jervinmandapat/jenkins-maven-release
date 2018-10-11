@@ -28,7 +28,7 @@ pipeline {
             steps
             {
                 sh 'git config user.email "jervinmandapat@gmail.com"'
-                sh 'git config user.name "jervinmandapat"'
+                sh 'git config user.name "Jervin Mandapat"'
             }
         }
 
