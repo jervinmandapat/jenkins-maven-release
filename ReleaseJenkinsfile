@@ -29,36 +29,41 @@ pipeline {
             steps
             {
                 echo 'Preparing releasing..'
+
+                git branch: 'master',
+                    credentialsId: 'JervinGit'
+                    url: 'https://github.com/jervinmandapat/jenkins-maven-release.git'
+
                 withMaven(
                     maven: 'Maven3',
                     options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
                 mavenLocalRepo: '${M2_HOME}/.repository')
                 {
-                    sh "mvn clean"
-                    sh "mvn -B release:prepare"
+                    // sh "mvn clean"
+                    sh "mvn --batch-mode release:clean release:prepare release:perform"
                 }
             }
-            post {
-                success {
-                    echo 'Performing Release..'
-                    withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                    mavenLocalRepo: '${M2_HOME}/.repository')
-                    {
-                        sh "mvn -B release:perform"
-                    }
+            // post {
+            //     success {
+            //         echo 'Performing Release..'
+            //         withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+            //         mavenLocalRepo: '${M2_HOME}/.repository')
+            //         {
+            //             sh "mvn -B release:perform"
+            //         }
 
-                    sh 'mkdir -p sample-jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./sample-jenkins-release';
-                    archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
-                }
-                failure {
-                    echo 'Release rollback..'
-                    withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
-                    mavenLocalRepo: '${M2_HOME}/.repository')
-                    {
-                        sh "mvn -B release:rollback"
-                    }
-                }
-            }
+            //         sh 'mkdir -p sample-jenkins-release && cp ./target/checkout/jenkins/target/*.ear ./sample-jenkins-release';
+            //         archiveArtifacts artifacts: 'sample-jenkins-release/*.*', fingerprint: true
+            //     }
+            //     failure {
+            //         echo 'Release rollback..'
+            //         withMaven(maven: 'Maven3',options: [artifactsPublisher(disabled: true),junitPublisher(disabled: true)],
+            //         mavenLocalRepo: '${M2_HOME}/.repository')
+            //         {
+            //             sh "mvn -B release:rollback"
+            //         }
+            //     }
+            // }
         }
     }
 }
