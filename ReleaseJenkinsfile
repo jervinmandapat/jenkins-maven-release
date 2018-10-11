@@ -67,8 +67,10 @@ pipeline
                     mavenLocalRepo: '${M2_HOME}/.repository'
                 )
                 {
-                    sh 'mvn --batch-mode release:clean release:prepare release:perform 
-                        -Dusername=${USER_CREDENTIALS_USR} -Dpassword=${USER_CREDENTIALS_PSW}'
+                    sh '''
+                        mvn --batch-mode release:clean release:prepare release:perform 
+                        -Dusername=${USER_CREDENTIALS_USR} -Dpassword=${USER_CREDENTIALS_PSW}
+                    '''
                 }
             }
             post 
