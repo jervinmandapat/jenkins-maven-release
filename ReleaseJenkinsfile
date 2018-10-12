@@ -70,7 +70,8 @@ pipeline
                     sh 'mvn --batch-mode release:clean      \
                         release:prepare release:perform     \
                         -Dusername=${USER_CREDENTIALS_USR}  \
-                        -Dpassword=${USER_CREDENTIALS_PSW}'
+                        -Dpassword=${USER_CREDENTIALS_PSW}  \
+                        -Dresume=false'
                 }
             }
             post 
