@@ -52,6 +52,17 @@ pipeline
             }
         }
 
+        stage ('Clean Tag')
+        {
+            steps
+            {
+                sh '''
+                    git tag -l | xargs git tag -d
+                    git fetch --tags
+                '''
+            }
+        }
+
         stage ('Perform Maven Release') 
         {
             when
