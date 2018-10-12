@@ -58,6 +58,7 @@ pipeline
             {
                 sh '''
                     git tag -l | xargs git tag -d
+                    git remote set-url origin https://${USER_CREDENTIALS_USR}:${USER_CREDENTIALS_PSW}@github.com/jervinmandapat/jenkins-maven-release.git
                     git fetch --tags
                 '''
             }
